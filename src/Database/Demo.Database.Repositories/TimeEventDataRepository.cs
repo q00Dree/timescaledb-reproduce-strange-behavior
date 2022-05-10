@@ -62,7 +62,7 @@ namespace Demo.Database.Repositories
                 try
                 {
                     TimeEventData? storedTrackingTed = await _dbContext.TimeEventsData
-                        .FirstAsync(d => d.SourceId == updatedTed.SourceId && d.Timestamp == updatedTed.Timestamp);
+                        .FirstOrDefaultAsync(d => d.SourceId == updatedTed.SourceId && d.Timestamp == updatedTed.Timestamp);
 
                     // Usually tests fall here, because entity with PK (SourceId + Timestamp) isn't in db, but have to be.
                     if (storedTrackingTed is null)
