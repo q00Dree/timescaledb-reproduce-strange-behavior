@@ -74,7 +74,7 @@ namespace Demo.Database.Context.Extensions
                                   FROM timescaledb_information.jobs j 
                                   INNER JOIN timescaledb_information.job_stats s ON j.job_id = s.job_id 
                                   WHERE j.proc_name = 'policy_compression' 
-                                  AND s.hypertable_name = @@hypertableName 
+                                  AND s.hypertable_name = @hypertableName 
                               ), 
                               scheduled => true, next_start => 'now');";
 
