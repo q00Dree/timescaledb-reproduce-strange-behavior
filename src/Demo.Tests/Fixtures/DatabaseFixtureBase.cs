@@ -74,7 +74,7 @@ namespace Demo.Tests.Fixutres
 
                     await transaction.CommitAsync();
                 }
-                catch (Exception)
+                catch
                 {
                     await transaction.RollbackAsync();
 
