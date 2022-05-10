@@ -1,5 +1,5 @@
-﻿using Dapper;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace Demo.Database.Context.Extensions
 {
@@ -15,7 +15,7 @@ namespace Demo.Database.Context.Extensions
 
             string query = $@"SELECT decompress_chunk(CONCAT('_timescaledb_internal.', chunk_name), if_compressed => true)::varchar 
                               FROM timescaledb_information.chunks 
-                              WHERE hypertable_name = @hypertableName 
+                              WHERE hypertable_name = '{hypertableName}' 
                               AND
                               (
                                   (@rangeStart BETWEEN range_start AND range_end) OR
@@ -23,15 +23,21 @@ namespace Demo.Database.Context.Extensions
                                   (range_start > @rangeStart AND range_end < @rangeEnd) 
                               );";
 
-            return context.Connection.ExecuteAsync(query, new { hypertableName, rangeStart, rangeEnd });
+            var parameters = new List<NpgsqlParameter>
+            {
+                new NpgsqlParameter("@rangeStart", NpgsqlTypes.NpgsqlDbType.TimestampTz) { Value = rangeStart },
+                new NpgsqlParameter("@rangeEnd", NpgsqlTypes.NpgsqlDbType.TimestampTz) { Value = rangeEnd }
+            };
+
+            return context.Database.ExecuteSqlRawAsync(query, parameters);
         }
 
         public static Task DecompressChunkAsync(this TimescaleContext context,
             string chunkName)
         {
-            string query = $"SELECT decompress_chunk(CONCAT('_timescaledb_internal.', @chunkName), if_compressed => true)::varchar;";
+            string query = $"SELECT decompress_chunk(CONCAT('_timescaledb_internal.', '{chunkName}'), if_compressed => true)::varchar;";
 
-            return context.Connection.ExecuteAsync(query, new { chunkName });
+            return context.Database.ExecuteSqlRawAsync(query);
         }
 
         public static Task CompressChunkAsync(this TimescaleContext context,
@@ -40,13 +46,18 @@ namespace Demo.Database.Context.Extensions
         {
             string query = $@"SELECT compress_chunk(CONCAT('_timescaledb_internal.', chunk_name), if_not_compressed => true)::varchar 
                               FROM timescaledb_information.chunks 
-                              WHERE hypertable_name = @hypertableName 
+                              WHERE hypertable_name = '{hypertableName}' 
                               AND
                               (
                                   (@timestamp BETWEEN range_start AND range_end)
                               );";
 
-            return context.Connection.ExecuteAsync(query, new { hypertableName, timestamp });
+            var parameters = new List<NpgsqlParameter>
+            {
+                new NpgsqlParameter("@timestamp", NpgsqlTypes.NpgsqlDbType.TimestampTz) { Value = timestamp }
+            };
+
+            return context.Database.ExecuteSqlRawAsync(query, parameters);
         }
 
         public static Task FindsAndPauseCompressionPolicyJobAsync(this TimescaleContext context,
@@ -58,11 +69,11 @@ namespace Demo.Database.Context.Extensions
                                   FROM timescaledb_information.jobs j 
                                   INNER JOIN timescaledb_information.job_stats s ON j.job_id = s.job_id 
                                   WHERE j.proc_name = 'policy_compression' 
-                                  AND s.hypertable_name = @hypertableName 
+                                  AND s.hypertable_name = '{hypertableName}' 
                               ), 
                               scheduled => false, next_start => 'infinity');";
 
-            return context.Connection.ExecuteAsync(query, new { hypertableName });
+            return context.Database.ExecuteSqlRawAsync(query);
         }
 
         public static Task FindsAndScheduleCompressionPolicyJobAsync(this TimescaleContext context,
@@ -74,20 +85,25 @@ namespace Demo.Database.Context.Extensions
                                   FROM timescaledb_information.jobs j 
                                   INNER JOIN timescaledb_information.job_stats s ON j.job_id = s.job_id 
                                   WHERE j.proc_name = 'policy_compression' 
-                                  AND s.hypertable_name = @hypertableName 
+                                  AND s.hypertable_name = '{hypertableName}' 
                               ), 
                               scheduled => true, next_start => 'now');";
 
-            return context.Connection.ExecuteAsync(query, new { hypertableName });
+            return context.Database.ExecuteSqlRawAsync(query);
         }
 
         public static Task DropChunksNewerThanAsync(this TimescaleContext context,
             string hypertableName,
             DateTimeOffset startPoint)
         {
-            string query = $"SELECT drop_chunks(@hypertableName, newer_than => @startPoint);";
+            string query = $"SELECT drop_chunks('{hypertableName}', newer_than => @startPoint);";
 
-            return context.Connection.ExecuteAsync(query, new { hypertableName, startPoint });
+            var parameters = new List<NpgsqlParameter>
+            {
+                new NpgsqlParameter("@startPoint", NpgsqlTypes.NpgsqlDbType.TimestampTz) { Value = startPoint }
+            };
+
+            return context.Database.ExecuteSqlRawAsync(query, parameters);
         }
 
         public static Task DropChunksNewerThanNegativeInfinityAsync(this TimescaleContext context,

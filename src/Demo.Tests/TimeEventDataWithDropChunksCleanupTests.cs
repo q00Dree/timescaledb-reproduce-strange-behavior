@@ -60,11 +60,6 @@ namespace Demo.Tests
         [InlineData(15)]
         [InlineData(20)]
         [InlineData(25)]
-        [InlineData(30)]
-        [InlineData(35)]
-        [InlineData(40)]
-        [InlineData(45)]
-        [InlineData(50)]
         public async Task InsertTimeEventDataToDatabaseOkTest(int itemsToCreate)
         {
             // Arrange & Act
@@ -104,11 +99,6 @@ namespace Demo.Tests
         [InlineData(15)]
         [InlineData(20)]
         [InlineData(25)]
-        [InlineData(30)]
-        [InlineData(35)]
-        [InlineData(40)]
-        [InlineData(45)]
-        [InlineData(50)]
         public async Task UpdateTimeEventDataFromCompressedChunkOkTest(int itemsToCreate)
         {
             // Arrange
