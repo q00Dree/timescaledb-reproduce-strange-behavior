@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+	<Nullable>enable</Nullable>
+	<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+	<ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Demo.Database.Context\Demo.Database.Context.csproj" />
+  </ItemGroup>
+
+</Project>

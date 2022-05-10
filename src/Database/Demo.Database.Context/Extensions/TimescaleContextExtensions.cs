@@ -26,6 +26,14 @@ namespace Demo.Database.Context.Extensions
             return context.Connection.ExecuteAsync(query, new { hypertableName, rangeStart, rangeEnd });
         }
 
+        public static Task DecompressChunkAsync(this TimescaleContext context,
+            string chunkName)
+        {
+            string query = $"SELECT decompress_chunk(CONCAT('_timescaledb_internal.', @chunkName), if_compressed => true)::varchar;";
+
+            return context.Connection.ExecuteAsync(query, new { chunkName });
+        }
+
         public static Task CompressChunkAsync(this TimescaleContext context,
             string hypertableName,
             DateTimeOffset timestamp)
@@ -39,6 +47,38 @@ namespace Demo.Database.Context.Extensions
                               );";
 
             return context.Connection.ExecuteAsync(query, new { hypertableName, timestamp });
+        }
+
+        public static Task FindsAndPauseCompressionPolicyJobAsync(this TimescaleContext context,
+            string hypertableName)
+        {
+            string query = $@"SELECT alter_job(job_id => 
+                              (
+                                  SELECT s.job_id 
+                                  FROM timescaledb_information.jobs j 
+                                  INNER JOIN timescaledb_information.job_stats s ON j.job_id = s.job_id 
+                                  WHERE j.proc_name = 'policy_compression' 
+                                  AND s.hypertable_name = @hypertableName 
+                              ), 
+                              scheduled => false, next_start => 'infinity');";
+
+            return context.Connection.ExecuteAsync(query, new { hypertableName });
+        }
+
+        public static Task FindsAndScheduleCompressionPolicyJobAsync(this TimescaleContext context,
+            string hypertableName)
+        {
+            string query = $@"SELECT alter_job(job_id => 
+                              (
+                                  SELECT s.job_id 
+                                  FROM timescaledb_information.jobs j 
+                                  INNER JOIN timescaledb_information.job_stats s ON j.job_id = s.job_id 
+                                  WHERE j.proc_name = 'policy_compression' 
+                                  AND s.hypertable_name = @@hypertableName 
+                              ), 
+                              scheduled => true, next_start => 'now');";
+
+            return context.Connection.ExecuteAsync(query, new { hypertableName });
         }
 
         public static Task DropChunksNewerThanAsync(this TimescaleContext context,

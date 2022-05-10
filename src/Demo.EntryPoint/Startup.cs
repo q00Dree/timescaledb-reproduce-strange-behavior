@@ -1,4 +1,5 @@
 ﻿using Demo.Database.Context.Extensions;
+using Demo.Database.Repositories.Extensions;
 
 namespace Demo.EntryPoint
 {
@@ -14,6 +15,7 @@ namespace Demo.EntryPoint
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddTimescaleDb(Configuration);
+            services.AddRepositories();
         }
 
         public void Configure(IApplicationBuilder _)

@@ -75,6 +75,32 @@ namespace Demo.Tests.Fixutres
             }
         }
 
+        public static void AssertTimeEventData(TimeEventData? expected, TimeEventData? actual)
+        {
+            Assert.NotNull(expected);
+            Assert.NotNull(actual);
+
+            Assert.Equal(expected!.SourceId, actual!.SourceId);
+            Assert.Equal(expected.Longitude, actual.Longitude);
+            Assert.Equal(expected.Latitude, actual.Latitude);
+            Assert.Equal(expected.Timestamp.ToString(), actual.Timestamp.ToString());
+            Assert.Equal(expected.Type, actual.Type);
+            Assert.Equal(expected.JsonData, actual.JsonData);
+        }
+
+        public static void AssertTimeEventsData(List<TimeEventData> expected, List<TimeEventData> actual)
+        {
+            expected = expected.OrderBy(x => x.SourceId).ThenBy(x => x.Timestamp).ToList();
+            actual = expected.OrderBy(x => x.SourceId).ThenBy(x => x.Timestamp).ToList();
+
+            Assert.Equal(expected.Count, actual.Count);
+
+            for (int i = 0; i < expected.Count; i++)
+            {
+                AssertTimeEventData(expected[i], actual[i]);
+            }
+        }
+
         public static TimeEventData CreateTimeEventData(Guid sourceId,
             Guid eventId,
             DateTimeOffset timestamp,

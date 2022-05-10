@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demo.Database.Context", "Da
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demo.Database.Models", "Database\Demo.Database.Models\Demo.Database.Models.csproj", "{99F8392D-83FC-46C8-B26A-10C203389160}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demo.Database.Repositories", "Database\Demo.Database.Repositories\Demo.Database.Repositories.csproj", "{C3812D05-2227-482F-8E3F-FDBD3B4A3851}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,6 +37,10 @@ Global
 		{99F8392D-83FC-46C8-B26A-10C203389160}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{99F8392D-83FC-46C8-B26A-10C203389160}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{99F8392D-83FC-46C8-B26A-10C203389160}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C3812D05-2227-482F-8E3F-FDBD3B4A3851}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C3812D05-2227-482F-8E3F-FDBD3B4A3851}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C3812D05-2227-482F-8E3F-FDBD3B4A3851}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C3812D05-2227-482F-8E3F-FDBD3B4A3851}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -42,6 +48,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{0B53E99D-CEBB-458D-A7D7-897ED7AE3738} = {503F9F50-E74C-4CCC-A97B-730B2B32E7DD}
 		{99F8392D-83FC-46C8-B26A-10C203389160} = {503F9F50-E74C-4CCC-A97B-730B2B32E7DD}
+		{C3812D05-2227-482F-8E3F-FDBD3B4A3851} = {503F9F50-E74C-4CCC-A97B-730B2B32E7DD}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {139BDD3E-5617-4AFF-AAA2-0C60F28CAFDE}

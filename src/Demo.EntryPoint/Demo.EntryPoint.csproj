@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Database\Demo.Database.Context\Demo.Database.Context.csproj" />
+    <ProjectReference Include="..\Database\Demo.Database.Repositories\Demo.Database.Repositories.csproj" />
   </ItemGroup>
 
 </Project>
