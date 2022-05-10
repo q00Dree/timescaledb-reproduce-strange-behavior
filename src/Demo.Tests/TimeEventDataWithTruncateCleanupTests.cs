@@ -1,5 +1,6 @@
 ﻿using Demo.Database.Context;
 using Demo.Database.Models;
+using Demo.Tests.Fixutres;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Xunit;
@@ -7,15 +8,14 @@ using Xunit.Abstractions;
 
 namespace Demo.Tests
 {
-    [Collection("DatabaseCollection")]
-    public class TimeEventDataTests : IAsyncLifetime
+    public class TimeEventDataWithTruncateCleanupTests : IClassFixture<DatabaseFixtureTruncateCleanup>, IAsyncLifetime
     {
-        private readonly DatabaseFixture _fixture;
+        private readonly DatabaseFixtureTruncateCleanup _fixture;
         private readonly ITestOutputHelper _output;
         private readonly DbContextOptions<TimescaleContext> _diagnosticOptions;
         private readonly TimescaleContext _context;
 
-        public TimeEventDataTests(DatabaseFixture fixture,
+        public TimeEventDataWithTruncateCleanupTests(DatabaseFixtureTruncateCleanup fixture,
             ITestOutputHelper output)
         {
             _fixture = fixture;
@@ -48,23 +48,28 @@ namespace Demo.Tests
 
         [Theory]
         [InlineData(1)]
+        [InlineData(2)]
+        [InlineData(3)]
+        [InlineData(4)]
         [InlineData(5)]
         [InlineData(10)]
+        [InlineData(15)]
         [InlineData(20)]
+        [InlineData(30)]
         [InlineData(40)]
-        [InlineData(80)]
+        [InlineData(50)]
         public async Task InsertTimeEventDataToDatabaseOkTest(int itemsToCreate)
         {
             // Arrange & Act
             var sourceId = Guid.NewGuid();
             var eventId = Guid.NewGuid();
 
-            var tedsToSave = new List<TimeEventData>();
+            var tedsToSave = new List<TimeEventData>(itemsToCreate);
             for (int i = 0; i < itemsToCreate; i++)
             {
-                var timestamp = DateTimeOffset.UtcNow.AddDays(DatabaseFixture.AdjustForChunkInPast * i);
+                var timestamp = DateTimeOffset.UtcNow.AddDays(DatabaseFixtureBase.AdjustForChunkInPast * i);
 
-                TimeEventData tedToSave = DatabaseFixture.CreateTimeEventData(sourceId, eventId, timestamp, i + 1);
+                TimeEventData tedToSave = DatabaseFixtureBase.CreateTimeEventData(sourceId, eventId, timestamp, i + 1);
                 tedsToSave.Add(tedToSave);
 
                 await _fixture.AddTimeEventDataToDatabaseAsync(tedToSave, true, _diagnosticOptions, _output);
@@ -73,7 +78,13 @@ namespace Demo.Tests
             // Assert
             int storedTedsCount = _context.TimeEventsData.Count();
 
-            Assert.Equal(tedsToSave.Count, storedTedsCount);
+            if (itemsToCreate != storedTedsCount)
+            {
+                // set your debug breakpoint here and wait
+                // see logs and database records at this moment
+            }
+
+            Assert.Equal(itemsToCreate, storedTedsCount);
         }
     }
 }

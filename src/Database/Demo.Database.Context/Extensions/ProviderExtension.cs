@@ -12,8 +12,7 @@ namespace Demo.Database.Context.Extensions
 
             var connectionString = configuration.GetConnectionString("DefaultConnection");
 
-            services.AddDbContext<TimescaleContext>(options =>
-                options.UseNpgsql(connectionString));
+            services.AddDbContext<TimescaleContext>(options => options.UseNpgsql(connectionString));
 
             services.AddSingleton<TimeEventDataHypertableSharedResource>();
         }

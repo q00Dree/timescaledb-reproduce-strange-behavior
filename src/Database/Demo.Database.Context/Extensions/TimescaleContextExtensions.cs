@@ -41,6 +41,22 @@ namespace Demo.Database.Context.Extensions
             return context.Connection.ExecuteAsync(query, new { hypertableName, timestamp });
         }
 
+        public static Task DropChunksNewerThanAsync(this TimescaleContext context,
+            string hypertableName,
+            DateTimeOffset startPoint)
+        {
+            string query = $"SELECT drop_chunks(@hypertableName, newer_than => @startPoint);";
+
+            return context.Connection.ExecuteAsync(query, new { hypertableName, startPoint });
+        }
+
+        public static Task DropChunksNewerThanNegativeInfinityAsync(this TimescaleContext context,
+                    string hypertableName)
+        {
+            return DropChunksNewerThanAsync(context, hypertableName, DateTimeOffset.MinValue);
+        }
+
+
         public static Task TruncateTableAsync(this TimescaleContext context,
             string hypertableName)
         {

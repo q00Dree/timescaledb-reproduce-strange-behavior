@@ -8,9 +8,9 @@ using System.Text.Json;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Demo.Tests
+namespace Demo.Tests.Fixutres
 {
-    public class DatabaseFixture : IAsyncLifetime
+    public abstract class DatabaseFixtureBase : IAsyncLifetime
     {
         public const int AdjustForChunkInPast = -40;
 
@@ -18,7 +18,7 @@ namespace Demo.Tests
         public readonly DbContextOptions<TimescaleContext> DefaultOptions;
         public readonly TimeEventDataHypertableSharedResource SharedResource;
 
-        public DatabaseFixture()
+        public DatabaseFixtureBase()
         {
             Configuration? configuration = ConfigurationManager.OpenExeConfiguration(Assembly.GetExecutingAssembly().Location);
             ConnectionString = configuration.ConnectionStrings.ConnectionStrings["TestDbConnection"].ConnectionString;
@@ -29,6 +29,8 @@ namespace Demo.Tests
 
             SharedResource = new TimeEventDataHypertableSharedResource();
         }
+
+        public abstract Task CleanupTimeEventDataHypertableAsync(TimescaleContext context);
 
         public async Task InitializeAsync()
         {
@@ -45,21 +47,6 @@ namespace Demo.Tests
             await CleanupTimeEventDataHypertableAsync(ctx);
         }
 
-        public async Task CleanupTimeEventDataHypertableAsync(TimescaleContext context)
-        {
-            await SharedResource.Semaphore.WaitAsync();
-
-            try
-            {
-                await context.DecompressChunksAsync(SharedResource.HypertableName);
-                await context.TruncateTableAsync(SharedResource.HypertableName);
-            }
-            finally
-            {
-                SharedResource.Semaphore.Release();
-            }
-        }
-
         public async Task AddTimeEventDataToDatabaseAsync(TimeEventData ted,
             bool withCompressingChunk,
             DbContextOptions<TimescaleContext>? diagnosticContextOptions = null,
@@ -69,17 +56,29 @@ namespace Demo.Tests
 
             try
             {
-                await using var ctx = new TimescaleContext(diagnosticContextOptions ?? DefaultOptions);
+                await using var context = new TimescaleContext(diagnosticContextOptions ?? DefaultOptions);
+                await using var transaction = await context.Database.BeginTransactionAsync();
 
-                await ctx.TimeEventsData.AddAsync(ted);
-                outputHelper?.WriteLine(ctx.ChangeTracker.DebugView.LongView);
-
-                await ctx.SaveChangesAsync();
-                outputHelper?.WriteLine(ctx.ChangeTracker.DebugView.LongView);
-
-                if (withCompressingChunk)
+                try
                 {
-                    await ctx.CompressChunkAsync(SharedResource.HypertableName, ted.Timestamp);
+                    await context.TimeEventsData.AddAsync(ted);
+                    outputHelper?.WriteLine(context.ChangeTracker.DebugView.LongView);
+
+                    await context.SaveChangesAsync();
+                    outputHelper?.WriteLine(context.ChangeTracker.DebugView.LongView);
+
+                    if (withCompressingChunk)
+                    {
+                        await context.CompressChunkAsync(SharedResource.HypertableName, ted.Timestamp);
+                    }
+
+                    await transaction.CommitAsync();
+                }
+                catch (Exception)
+                {
+                    await transaction.RollbackAsync();
+
+                    throw;
                 }
             }
             finally
