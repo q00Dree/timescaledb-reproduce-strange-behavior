@@ -47,16 +47,15 @@ namespace Demo.Tests
         #endregion
 
         [Theory]
-        [InlineData(1)]
-        [InlineData(2)]
-        [InlineData(3)]
-        [InlineData(4)]
         [InlineData(5)]
         [InlineData(10)]
         [InlineData(15)]
         [InlineData(20)]
+        [InlineData(25)]
         [InlineData(30)]
+        [InlineData(35)]
         [InlineData(40)]
+        [InlineData(45)]
         [InlineData(50)]
         public async Task InsertTimeEventDataToDatabaseOkTest(int itemsToCreate)
         {
@@ -80,7 +79,7 @@ namespace Demo.Tests
 
             if (itemsToCreate != storedTedsCount)
             {
-                // set your debug breakpoint here and wait
+                // set your debug breakpoint here and run tests until reach this point
                 // see logs and database records at this moment
             }
 
