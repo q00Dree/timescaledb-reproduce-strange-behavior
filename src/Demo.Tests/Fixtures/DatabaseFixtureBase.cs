@@ -57,28 +57,16 @@ namespace Demo.Tests.Fixutres
             try
             {
                 await using var context = new TimescaleContext(diagnosticContextOptions ?? DefaultOptions);
-                await using var transaction = await context.Database.BeginTransactionAsync();
 
-                try
+                await context.TimeEventsData.AddAsync(ted);
+                outputHelper?.WriteLine(context.ChangeTracker.DebugView.LongView);
+
+                await context.SaveChangesAsync();
+                outputHelper?.WriteLine(context.ChangeTracker.DebugView.LongView);
+
+                if (withCompressingChunk)
                 {
-                    await context.TimeEventsData.AddAsync(ted);
-                    outputHelper?.WriteLine(context.ChangeTracker.DebugView.LongView);
-
-                    await context.SaveChangesAsync();
-                    outputHelper?.WriteLine(context.ChangeTracker.DebugView.LongView);
-
-                    if (withCompressingChunk)
-                    {
-                        await context.CompressChunkAsync(SharedResource.HypertableName, ted.Timestamp);
-                    }
-
-                    await transaction.CommitAsync();
-                }
-                catch
-                {
-                    await transaction.RollbackAsync();
-
-                    throw;
+                    await context.CompressChunkAsync(SharedResource.HypertableName, ted.Timestamp);
                 }
             }
             finally
