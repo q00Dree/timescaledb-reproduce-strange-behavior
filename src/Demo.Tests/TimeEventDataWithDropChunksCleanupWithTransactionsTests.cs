@@ -1,6 +1,7 @@
 ﻿using Demo.Database.Context;
 using Demo.Database.Models;
 using Demo.Database.Repositories;
+using Demo.Tests.Fixtures;
 using Demo.Tests.Fixutres;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -10,15 +11,15 @@ using Xunit.Abstractions;
 
 namespace Demo.Tests
 {
-    public class TimeEventDataWithTruncateCleanupTests : IClassFixture<DatabaseFixtureTruncateCleanup>, IAsyncLifetime
+    public class TimeEventDataWithDropChunksCleanupWithTransactionsTests : IClassFixture<DatabaseFixtureDropChunksCleanupWithTransactions>, IAsyncLifetime
     {
-        private readonly DatabaseFixtureTruncateCleanup _fixture;
+        private readonly DatabaseFixtureDropChunksCleanupWithTransactions _fixture;
         private readonly ITestOutputHelper _output;
         private readonly DbContextOptions<TimescaleContext> _diagnosticOptions;
         private readonly TimescaleContext _context;
         private readonly TimeEventDataRepository _repository;
 
-        public TimeEventDataWithTruncateCleanupTests(DatabaseFixtureTruncateCleanup fixture,
+        public TimeEventDataWithDropChunksCleanupWithTransactionsTests(DatabaseFixtureDropChunksCleanupWithTransactions fixture,
             ITestOutputHelper output)
         {
             _fixture = fixture;
@@ -114,13 +115,6 @@ namespace Demo.Tests
                 tedsToSave.Add(tedToSave);
 
                 await _fixture.AddTimeEventDataToDatabaseAsync(tedToSave, true, _diagnosticOptions, _output);
-            }
-
-            List<TimeEventData> checkTeds = await _repository.GetTimeEventsDataBySourceIdAsync(sourceId);
-
-            if (checkTeds.Count != itemsToCreate)
-            {
-
             }
 
             var updatedTeds = new List<TimeEventData>(itemsToCreate);

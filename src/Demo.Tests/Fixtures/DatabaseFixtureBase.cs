@@ -47,7 +47,7 @@ namespace Demo.Tests.Fixutres
             await CleanupTimeEventDataHypertableAsync(ctx);
         }
 
-        public async Task AddTimeEventDataToDatabaseAsync(TimeEventData ted,
+        public virtual async Task AddTimeEventDataToDatabaseAsync(TimeEventData ted,
             bool withCompressingChunk,
             DbContextOptions<TimescaleContext>? diagnosticContextOptions = null,
             ITestOutputHelper? outputHelper = null)
